@@ -267,8 +267,7 @@ class Common
     /**
      * Prepares token content for output to screen.
      *
-     * Replaces invisible characters so they are visible. On non-Windows
-     * operating systems it will also colour the invisible characters.
+     * Replaces invisible characters so they are visible, and colour them.
      *
      * @param string   $content The content to prepare.
      * @param string[] $exclude A list of characters to leave invisible.
@@ -278,35 +277,24 @@ class Common
      */
     public static function prepareForOutput($content, $exclude=[])
     {
-        if (stripos(PHP_OS, 'WIN') === 0) {
-            if (in_array("\r", $exclude, true) === false) {
-                $content = str_replace("\r", '\r', $content);
-            }
+        if (in_array("\r", $exclude, true) === false) {
+            $content = str_replace("\r", "\033[30;1m\\r\033[0m", $content);
+        }
 
-            if (in_array("\n", $exclude, true) === false) {
-                $content = str_replace("\n", '\n', $content);
-            }
+        if (in_array("\n", $exclude, true) === false) {
+            $content = str_replace("\n", "\033[30;1m\\n\033[0m", $content);
+        }
 
-            if (in_array("\t", $exclude, true) === false) {
-                $content = str_replace("\t", '\t', $content);
-            }
-        } else {
-            if (in_array("\r", $exclude, true) === false) {
-                $content = str_replace("\r", "\033[30;1m\\r\033[0m", $content);
-            }
+        if (in_array("\t", $exclude, true) === false) {
+            $content = str_replace("\t", "\033[30;1m\\t\033[0m", $content);
+        }
 
-            if (in_array("\n", $exclude, true) === false) {
-                $content = str_replace("\n", "\033[30;1m\\n\033[0m", $content);
-            }
-
-            if (in_array("\t", $exclude, true) === false) {
-                $content = str_replace("\t", "\033[30;1m\\t\033[0m", $content);
-            }
-
+        if (stripos(PHP_OS, 'WIN') !== 0) {
+            // Printing Unicode characters like '·' to Windows console only works since PHP 7.1.
             if (in_array(' ', $exclude, true) === false) {
                 $content = str_replace(' ', "\033[30;1m·\033[0m", $content);
             }
-        }//end if
+        }
 
         return $content;
 
